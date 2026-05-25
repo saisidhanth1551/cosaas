@@ -1,0 +1,41 @@
+# Node Modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Production Builds
+client/dist/
+client/dist-ssr/
+
+# System Files & Logs
+.DS_Store
+Thumbs.db
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local Configuration & Environment Files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+client/*.local
+
+# IDEs & Editor Configuration
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Agent Temporary Directories
+.agents/
+.gemini/

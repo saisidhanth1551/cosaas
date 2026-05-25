@@ -51,10 +51,11 @@ const getRooms = async (req, res) => {
 const bookRoom = async (req, res) => {
   try {
     const { id } = req.params;
-    const { organizer, date, timeSlot, duration } = req.body;
+    const { organizer, bookedBy, date, timeSlot, duration } = req.body;
+    const finalOrganizer = organizer || bookedBy;
 
-    if (!organizer || !date || !timeSlot || !duration) {
-      return res.status(400).json({ error: 'Please provide organizer, date, time slot, and duration.' });
+    if (!finalOrganizer || !date || !timeSlot || !duration) {
+      return res.status(400).json({ error: 'Please provide organizer or bookedBy, date, time slot, and duration.' });
     }
 
     const room = await Room.findById(id);
@@ -87,7 +88,7 @@ const bookRoom = async (req, res) => {
 
     // Push new booking
     room.bookings.push({
-      organizer,
+      organizer: finalOrganizer,
       date,
       timeSlot,
       duration

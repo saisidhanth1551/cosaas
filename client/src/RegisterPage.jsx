@@ -1,72 +1,55 @@
 import { useState } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from './AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const DEMO_PERSONAS = [
-  {
-    role: 'Admin',
-    name: 'Nisha Rao',
-    email: 'admin@cosaas.com',
-    password: '123456',
-    desc: 'Full administrative credentials across all branches and global settings.',
-    color: 'border-cyan-500/30 bg-cyan-500/5 text-cyan-200'
-  },
-  {
-    role: 'Branch Manager',
-    name: 'Rahul Nair',
-    email: 'manager@cosaas.com',
-    password: '123456',
-    desc: 'Local oversight across pipeline, CRM, and visitors. Excludes Settings.',
-    color: 'border-amber-400/30 bg-amber-400/5 text-amber-200'
-  },
-  {
-    role: 'Receptionist',
-    name: 'Tanvi Shah',
-    email: 'reception@cosaas.com',
-    password: '123456',
-    desc: 'Operations handling of seat maps, bookings, and front desk check-ins only.',
-    color: 'border-emerald-500/30 bg-emerald-500/5 text-emerald-200'
-  }
+const ROLES = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'manager', label: 'Branch Manager' },
+  { value: 'receptionist', label: 'Receptionist' }
 ]
 
-export default function LoginPage() {
+const BRANCHES = [
+  { value: 'indiranagar', label: 'Bengaluru Indiranagar' },
+  { value: 'mumbai-bkc', label: 'Mumbai BKC' },
+  { value: 'gurugram-cyber-city', label: 'Gurugram Cyber City' },
+  { value: 'hyderabad', label: 'Hyderabad Hitech' },
+  { value: 'bangalore', label: 'Bangalore General' },
+  { value: 'chennai', label: 'Chennai T-Nagar' }
+]
+
+export default function RegisterPage() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState('manager')
+  const [branch, setBranch] = useState('indiranagar')
   const [error, setError] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [selectedPersona, setSelectedPersona] = useState(null)
 
-  const { login } = useAuth()
+  const { registerUser } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
-
-  // Redirect target
-  const from = location.state?.from?.pathname || '/dashboard'
-
-  // Autofill persona credentials
-  const selectPersona = (persona) => {
-    setSelectedPersona(persona.role)
-    setEmail(persona.email)
-    setPassword(persona.password)
-    setError(null)
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!email || !password) {
-      setError('Please enter your email and password')
+    if (!name || !email || !password || !role || !branch) {
+      setError('Please fill in all the required fields')
+      return
+    }
+
+    if (password.length < 6) {
+      setError('Password must contain at least 6 characters')
       return
     }
 
     setIsSubmitting(true)
     setError(null)
 
-    const result = await login(email, password)
+    const result = await registerUser(name, email, password, role, branch)
     setIsSubmitting(false)
 
     if (result.success) {
-      navigate(from, { replace: true })
+      navigate('/dashboard', { replace: true })
     } else {
       setError(result.error)
     }
@@ -91,59 +74,9 @@ export default function LoginPage() {
             Co
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Access CoSaaS OS</h1>
-            <p className="text-xs text-slate-500 mt-1">Workspace operations and client pipeline management</p>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Create CoSaaS Workspace</h1>
+            <p className="text-xs text-slate-500 mt-1">Register new corporate staff and initialize local branch dashboards</p>
           </div>
-        </div>
-
-        {/* Quick Demo Login Selector panel */}
-        <div className="space-y-3 border-y border-white/5 py-4">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-slate-400 uppercase tracking-wider">Quick Demo Personas</span>
-            <span className="text-[10px] text-cyan-400 font-semibold uppercase">One-Click Autofill</span>
-          </div>
-
-          <div className="grid gap-2.5 sm:grid-cols-3">
-            {DEMO_PERSONAS.map(p => {
-              const isActive = selectedPersona === p.role
-              return (
-                <button
-                  className={`w-full text-left rounded-xl border p-3 flex flex-col justify-between gap-1.5 transition cursor-pointer active:scale-95 ${
-                    isActive 
-                      ? 'border-cyan-400 bg-cyan-400/10 shadow-[0_0_12px_rgba(34,211,238,0.15)] text-white' 
-                      : 'border-white/5 bg-white/[0.02] text-slate-400 hover:border-white/10 hover:bg-white/[0.04]'
-                  }`}
-                  key={p.role}
-                  onClick={() => selectPersona(p)}
-                  type="button"
-                >
-                  <div>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider ${isActive ? 'text-cyan-300' : 'text-slate-500'}`}>
-                      {p.role}
-                    </p>
-                    <p className="font-semibold text-xs mt-0.5 truncate">{p.name}</p>
-                  </div>
-                  <span className="text-[10px] opacity-75 truncate">{p.email}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          {/* Seeded Persona Information box */}
-          <AnimatePresence mode="wait">
-            {selectedPersona && (
-              <motion.div
-                animate={{ opacity: 1, height: 'auto' }}
-                className="rounded-lg bg-white/[0.03] border border-white/5 p-3 text-xs text-slate-400 leading-relaxed shrink-0"
-                exit={{ opacity: 0, height: 0 }}
-                initial={{ opacity: 0, height: 0 }}
-                key={selectedPersona}
-              >
-                <strong className="text-white capitalize mr-1">{selectedPersona}:</strong> 
-                {DEMO_PERSONAS.find(p => p.role === selectedPersona)?.desc}
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* Error notification banner */}
@@ -165,7 +98,27 @@ export default function LoginPage() {
 
         {/* Input Form */}
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+          <div className="space-y-3.5">
+            {/* Full Name */}
+            <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-400">
+              Staff Full Name
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-600">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </span>
+                <input
+                  className="min-h-11 w-full pl-10 rounded-xl border border-white/10 bg-white/[0.04] pr-3 text-sm text-white placeholder-slate-600 outline-none transition focus:border-cyan-300/60 focus:bg-white/[0.06]"
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Rahul Sharma"
+                  required
+                  type="text"
+                  value={name}
+                />
+              </div>
+            </label>
+
             {/* Email Address */}
             <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-400">
               Corporate Email Address
@@ -177,8 +130,8 @@ export default function LoginPage() {
                 </span>
                 <input
                   className="min-h-11 w-full pl-10 rounded-xl border border-white/10 bg-white/[0.04] pr-3 text-sm text-white placeholder-slate-600 outline-none transition focus:border-cyan-300/60 focus:bg-white/[0.06]"
-                  onChange={(e) => { setEmail(e.target.value); setSelectedPersona(null); }}
-                  placeholder="name@cosaas.com"
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="rahul@cosaas.com"
                   required
                   type="email"
                   value={email}
@@ -197,7 +150,7 @@ export default function LoginPage() {
                 </span>
                 <input
                   className="min-h-11 w-full pl-10 rounded-xl border border-white/10 bg-white/[0.04] pr-3 text-sm text-white placeholder-slate-600 outline-none transition focus:border-cyan-300/60 focus:bg-white/[0.06]"
-                  onChange={(e) => { setPassword(e.target.value); setSelectedPersona(null); }}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
                   required
                   type="password"
@@ -205,6 +158,35 @@ export default function LoginPage() {
                 />
               </div>
             </label>
+
+            {/* Role and Branch Selectors */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-400">
+                System Role
+                <select
+                  className="min-h-11 w-full rounded-xl border border-white/10 bg-[#0b0d12] px-3 text-sm text-white outline-none transition focus:border-cyan-300/60 cursor-pointer"
+                  onChange={(e) => setRole(e.target.value)}
+                  value={role}
+                >
+                  {ROLES.map(r => (
+                    <option className="bg-[#0b0d12]" key={r.value} value={r.value}>{r.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-1.5 text-xs font-semibold text-slate-400">
+                Assigned Branch
+                <select
+                  className="min-h-11 w-full rounded-xl border border-white/10 bg-[#0b0d12] px-3 text-sm text-white outline-none transition focus:border-cyan-300/60 cursor-pointer"
+                  onChange={(e) => setBranch(e.target.value)}
+                  value={branch}
+                >
+                  {BRANCHES.map(b => (
+                    <option className="bg-[#0b0d12]" key={b.value} value={b.value}>{b.label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
 
           <div className="pt-2">
@@ -219,11 +201,11 @@ export default function LoginPage() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  <span>Verifying Credentials...</span>
+                  <span>Registering Account...</span>
                 </>
               ) : (
                 <>
-                  <span>Sign In to CoSaaS</span>
+                  <span>Create Account</span>
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
@@ -231,12 +213,12 @@ export default function LoginPage() {
               )}
             </button>
           </div>
-          
-          {/* Toggle Switch to Register */}
-          <p className="text-xs text-center text-slate-400 mt-3">
-            Don't have a workspace?{' '}
-            <Link className="text-cyan-400 font-bold hover:underline transition ml-1" to="/register">
-              Create account
+
+          {/* Toggle Switch */}
+          <p className="text-xs text-center text-slate-400 mt-2">
+            Already have an account?{' '}
+            <Link className="text-cyan-400 font-bold hover:underline transition ml-1" to="/login">
+              Sign In
             </Link>
           </p>
         </form>

@@ -67,7 +67,60 @@ const getMe = async (req, res) => {
   }
 };
 
+// @desc    Register a new corporate user
+// @route   POST /api/auth/register
+// @access  Public
+const register = async (req, res) => {
+  try {
+    const { name, email, password, role, branch } = req.body;
+
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ error: 'Please enter name, email, password, and role' });
+    }
+
+    // Verify email uniqueness
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ error: 'A corporate account with this email address already exists' });
+    }
+
+    // Create user document (pre-save hook will handle bcrypt hashing)
+    const user = new User({
+      name,
+      email,
+      password,
+      role: role.toLowerCase(),
+      branch: branch ? branch.toLowerCase() : 'indiranagar'
+    });
+
+    await user.save();
+
+    // Sign JWT
+    const JWT_SECRET = process.env.JWT_SECRET || 'cosaas_jwt_super_security_secret_key_987654321';
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '24h' });
+
+    console.log(`🔑 New corporate user registered: ${user.email} (${user.role})`);
+
+    res.status(201).json({
+      success: true,
+      message: 'User registered successfully',
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        branch: user.branch
+      }
+    });
+  } catch (error) {
+    console.error(`❌ Registration controller error: ${error.message}`);
+    res.status(500).json({ error: 'Internal server registration pipeline failure' });
+  }
+};
+
 module.exports = {
   login,
-  getMe
+  getMe,
+  register
 };

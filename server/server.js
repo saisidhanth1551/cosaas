@@ -6,6 +6,8 @@ const authRoutes = require('./routes/authRoutes');
 const seatRoutes = require('./routes/seatRoutes');
 const roomRoutes = require('./routes/roomRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const activityRoutes = require('./routes/activityRoutes');
 const User = require('./models/User');
 const Seat = require('./models/Seat');
 
@@ -138,6 +140,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/seats', seatRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/activity', activityRoutes);
 
 // Base route health check
 app.get('/', (req, res) => {

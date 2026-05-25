@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { HelpCircle, Play, CheckCircle, Plus, Search, Filter, Trash2, Edit, Save } from 'lucide-react'
 import { useAuth } from './AuthContext'
 
 const floorBranches = [
@@ -379,9 +380,12 @@ export default function TicketsPage() {
                       }`}>
                         {ticket.priority}
                       </span>
-                      <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
+                      <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                         statusStyles[ticket.status]
                       }`}>
+                        {ticket.status === 'open' && <HelpCircle className="h-2.5 w-2.5" />}
+                        {ticket.status === 'in progress' && <Play className="h-2.5 w-2.5" />}
+                        {ticket.status === 'resolved' && <CheckCircle className="h-2.5 w-2.5" />}
                         {ticket.status}
                       </span>
                     </div>
@@ -532,9 +536,10 @@ export default function TicketsPage() {
                 </div>
 
                 <button
-                  className="mt-6 w-full rounded-lg bg-cyan-400 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-cyan-300 active:scale-[0.98]"
+                  className="mt-6 w-full rounded-lg bg-cyan-400 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-cyan-300 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
                   type="submit"
                 >
+                  <Plus className="h-4 w-4 stroke-[2.5]" />
                   File Support Request
                 </button>
               </form>
@@ -660,9 +665,10 @@ export default function TicketsPage() {
                   </div>
 
                   <button
-                    className="mt-5 w-full rounded-lg bg-cyan-400 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-cyan-300 active:scale-[0.98]"
+                    className="mt-5 w-full rounded-lg bg-cyan-400 py-3 text-center text-sm font-bold text-slate-950 transition hover:bg-cyan-300 active:scale-[0.98] flex items-center justify-center gap-1.5 cursor-pointer"
                     type="submit"
                   >
+                    <Save className="h-4 w-4 stroke-[2]" />
                     Save Changes & Update Backlog
                   </button>
                 </form>

@@ -71,6 +71,34 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Register handler
+  const registerUser = async (name, email, password, role, branch) => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name, email, password, role, branch })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        return { success: false, error: data.error || 'Registration failed' }
+      }
+
+      // Store in state & storage
+      setUser(data.user)
+      setToken(data.token)
+      localStorage.setItem('cosaas_token', data.token)
+      return { success: true }
+    } catch (err) {
+      console.error('Network error during registration:', err)
+      return { success: false, error: 'Connection failed. Is the server running?' }
+    }
+  }
+
   // Logout handler
   const logout = () => {
     setUser(null)
@@ -83,6 +111,7 @@ export function AuthProvider({ children }) {
     token,
     loading,
     login,
+    registerUser,
     logout,
     isAuthenticated: !!user,
     isAdmin: user?.role?.toLowerCase() === 'admin',

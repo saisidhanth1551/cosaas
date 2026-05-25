@@ -1,11 +1,42 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  Map,
+  Armchair,
+  UserCheck,
+  Users,
+  CreditCard,
+  Ticket,
+  Settings,
+  LogOut,
+  TrendingUp,
+  Sparkles,
+  DoorOpen,
+  Activity,
+  UserPlus,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  HelpCircle,
+  Play,
+  Check,
+  DollarSign,
+  AlertTriangle,
+  Plus,
+  Save,
+  Edit,
+  Trash2,
+  Filter,
+  Search
+} from 'lucide-react'
 import './App.css'
 import CRMPage from './CRMPage'
 import { AuthProvider, useAuth } from './AuthContext'
 import ProtectedRoute from './ProtectedRoute'
 import LoginPage from './LoginPage'
+import RegisterPage from './RegisterPage'
 import UnauthorizedPage from './UnauthorizedPage'
 import BillingPage from './BillingPage'
 import ConferenceRoomsPage from './ConferenceRoomsPage'
@@ -43,14 +74,14 @@ const cardVariants = {
 const springTransition = { type: 'spring', stiffness: 260, damping: 24 }
 
 const routes = [
-  { label: 'Dashboard', path: '/dashboard', eyebrow: 'Operations dashboard', title: 'Workspace overview', roles: ['admin', 'manager', 'receptionist'] },
-  { label: 'Floor Map', path: '/floor-map', eyebrow: 'Space planning', title: 'Floor map', roles: ['admin', 'manager', 'receptionist'] },
-  { label: 'Bookings', path: '/bookings', eyebrow: 'Reservations', title: 'Bookings', roles: ['admin', 'manager', 'receptionist'] },
-  { label: 'Visitors', path: '/visitors', eyebrow: 'Front desk', title: 'Visitors', roles: ['admin', 'manager', 'receptionist'] },
-  { label: 'CRM', path: '/crm', eyebrow: 'Customer pipeline', title: 'CRM', roles: ['admin', 'manager'] },
-  { label: 'Billing', path: '/billing', eyebrow: 'Revenue operations', title: 'Billing', roles: ['admin', 'manager'] },
-  { label: 'Tickets', path: '/tickets', eyebrow: 'Support queue', title: 'Tickets', roles: ['admin', 'manager', 'receptionist'] },
-  { label: 'Settings', path: '/settings', eyebrow: 'Workspace controls', title: 'Settings', roles: ['admin', 'manager', 'receptionist'] },
+  { label: 'Dashboard', path: '/dashboard', eyebrow: 'Operations dashboard', title: 'Workspace overview', roles: ['admin', 'manager', 'receptionist'], icon: LayoutDashboard },
+  { label: 'Floor Map', path: '/floor-map', eyebrow: 'Space planning', title: 'Floor map', roles: ['admin', 'manager', 'receptionist'], icon: Map },
+  { label: 'Bookings', path: '/bookings', eyebrow: 'Reservations', title: 'Bookings', roles: ['admin', 'manager', 'receptionist'], icon: Armchair },
+  { label: 'Visitors', path: '/visitors', eyebrow: 'Front desk', title: 'Visitors', roles: ['admin', 'manager', 'receptionist'], icon: UserCheck },
+  { label: 'CRM', path: '/crm', eyebrow: 'Customer pipeline', title: 'CRM', roles: ['admin', 'manager'], icon: Users },
+  { label: 'Billing', path: '/billing', eyebrow: 'Revenue operations', title: 'Billing', roles: ['admin', 'manager'], icon: CreditCard },
+  { label: 'Tickets', path: '/tickets', eyebrow: 'Support queue', title: 'Tickets', roles: ['admin', 'manager', 'receptionist'], icon: Ticket },
+  { label: 'Settings', path: '/settings', eyebrow: 'Workspace controls', title: 'Settings', roles: ['admin', 'manager', 'receptionist'], icon: Settings },
 ]
 
 const stats = [
@@ -84,20 +115,37 @@ const stats = [
   },
 ]
 
-const chartData = [
-  { day: 'Mon', value: 64, heightClass: 'chart-bar--64' },
-  { day: 'Tue', value: 72, heightClass: 'chart-bar--72' },
-  { day: 'Wed', value: 78, heightClass: 'chart-bar--78' },
-  { day: 'Thu', value: 69, heightClass: 'chart-bar--69' },
-  { day: 'Fri', value: 86, heightClass: 'chart-bar--86' },
-  { day: 'Sat', value: 58, heightClass: 'chart-bar--58' },
-  { day: 'Sun', value: 74, heightClass: 'chart-bar--74' },
+const weekChartData = [
+  { day: 'Mon', value: 64 },
+  { day: 'Tue', value: 72 },
+  { day: 'Wed', value: 78 },
+  { day: 'Thu', value: 69 },
+  { day: 'Fri', value: 86 },
+  { day: 'Sat', value: 58 },
+  { day: 'Sun', value: 74 },
+]
+
+const monthChartData = [
+  { day: 'W1', value: 71 },
+  { day: 'W2', value: 83 },
+  { day: 'W3', value: 76 },
+  { day: 'W4', value: 89 },
+]
+
+const yearChartData = [
+  { day: 'Q1', value: 68 },
+  { day: 'Q2', value: 79 },
+  { day: 'Q3', value: 85 },
+  { day: 'Q4', value: 92 },
 ]
 
 const branches = [
   { name: 'Bengaluru Indiranagar', occupancy: '91%', seats: '384 seats' },
   { name: 'Mumbai BKC', occupancy: '87%', seats: '428 seats' },
   { name: 'Gurugram Cyber City', occupancy: '82%', seats: '352 seats' },
+  { name: 'Hyderabad HITEC', occupancy: '78%', seats: '280 seats' },
+  { name: 'Bangalore Koramangala', occupancy: '85%', seats: '320 seats' },
+  { name: 'Chennai OMR', occupancy: '74%', seats: '260 seats' },
 ]
 
 const floorBranches = [
@@ -305,14 +353,26 @@ function App() {
 
 function AppContent() {
   const location = useLocation()
+  const { user } = useAuth()
+  const [globalBranch, setGlobalBranch] = useState('all')
 
-  // Handle direct layout exclusion for auth views
-  const isAuthPage = ['/login', '/unauthorized'].includes(location.pathname)
+  useEffect(() => {
+    if (user) {
+      if (user.role?.toLowerCase() !== 'admin' && user.branch) {
+        setGlobalBranch(user.branch.toLowerCase())
+      } else {
+        setGlobalBranch('all')
+      }
+    }
+  }, [user])
+
+  const isAuthPage = ['/login', '/register', '/unauthorized'].includes(location.pathname)
 
   if (isAuthPage) {
     return (
       <Routes key={location.pathname} location={location}>
         <Route element={<LoginPage />} path="/login" />
+        <Route element={<RegisterPage />} path="/register" />
         <Route element={<UnauthorizedPage />} path="/unauthorized" />
         <Route element={<Navigate replace to="/login" />} path="*" />
       </Routes>
@@ -324,14 +384,14 @@ function AppContent() {
       <div className="flex min-h-screen">
         <Sidebar />
         <section className="flex min-w-0 flex-1 flex-col">
-          <TopNavbar />
+          <TopNavbar globalBranch={globalBranch} setGlobalBranch={setGlobalBranch} />
           <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 px-4 py-5 sm:px-6 lg:gap-6 lg:py-6">
             <AnimatePresence mode="wait">
               <Routes key={location.pathname} location={location}>
                 <Route element={<Navigate replace to="/dashboard" />} path="/" />
                 <Route element={
                   <ProtectedRoute allowedRoles={['admin', 'manager', 'receptionist']}>
-                    <Dashboard />
+                    <Dashboard globalBranch={globalBranch} />
                   </ProtectedRoute>
                 } path="/dashboard" />
                 <Route element={
@@ -415,7 +475,7 @@ function Sidebar() {
         {allowedRoutes.map((item) => (
           <NavLink
             className={({ isActive }) =>
-              `relative flex items-center justify-between overflow-hidden rounded-lg px-3 py-2.5 text-sm transition ${isActive ? 'text-slate-950' : 'text-slate-400 hover:bg-white/5 hover:text-white'
+              `relative flex items-center justify-between overflow-hidden rounded-lg px-3 py-2.5 text-sm transition group ${isActive ? 'text-slate-950 font-medium' : 'text-slate-400 hover:bg-white/5 hover:text-white'
               }`
             }
             key={item.path}
@@ -430,8 +490,9 @@ function Sidebar() {
                     transition={springTransition}
                   />
                 )}
-                <motion.span className="relative z-10" whileHover={{ x: 3 }}>
-                  {item.label}
+                <motion.span className="relative z-10 flex items-center gap-3" whileHover={{ x: 3 }}>
+                  {item.icon && <item.icon className={`h-4.5 w-4.5 stroke-[1.8] ${isActive ? 'text-slate-950' : 'text-slate-400 group-hover:text-white'}`} />}
+                  <span>{item.label}</span>
                 </motion.span>
                 {isActive && <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-emerald-500" />}
               </>
@@ -466,8 +527,9 @@ function Sidebar() {
           </div>
           <button
             onClick={logout}
-            className="rounded-lg bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 font-bold text-rose-300 transition hover:bg-rose-500/20 cursor-pointer active:scale-95 flex items-center gap-1 shrink-0"
+            className="rounded-lg bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 font-bold text-rose-300 transition hover:bg-rose-500/20 cursor-pointer active:scale-95 flex items-center gap-1.5 shrink-0"
           >
+            <LogOut className="h-3.5 w-3.5 stroke-[2]" />
             Logout
           </button>
         </div>
@@ -476,7 +538,7 @@ function Sidebar() {
   )
 }
 
-function TopNavbar() {
+function TopNavbar({ globalBranch, setGlobalBranch }) {
   const location = useLocation()
   const { user } = useAuth()
 
@@ -507,33 +569,42 @@ function TopNavbar() {
           </div>
         </div>
 
-        <div className="flex w-full items-center gap-2 sm:w-auto">
-          <label className="sr-only" htmlFor="branch">
-            Select branch
-          </label>
-          <select
-            className="min-h-10 flex-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm text-white outline-none transition focus:border-cyan-300 sm:w-48 sm:flex-none disabled:cursor-not-allowed disabled:opacity-50"
-            value={user?.role?.toLowerCase() === 'admin' ? undefined : user?.branch || 'all'}
-            disabled={user?.role?.toLowerCase() !== 'admin'}
-            id="branch"
-          >
-            <option className="bg-slate-950" value="all">
-              All branches
-            </option>
-            <option className="bg-slate-950" value="indiranagar">
-              Bengaluru Indiranagar
-            </option>
-            <option className="bg-slate-950" value="mumbai-bkc">
-              Mumbai BKC
-            </option>
-            <option className="bg-slate-950" value="gurugram-cyber-city">
-              Gurugram Cyber City
-            </option>
-          </select>
-          <button className="min-h-10 rounded-lg bg-white px-4 text-sm font-medium text-slate-950 transition hover:bg-slate-200">
-            Export
-          </button>
-        </div>
+        {['/', '/dashboard'].includes(location.pathname) && (
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <label className="sr-only" htmlFor="branch">
+              Select branch
+            </label>
+            <select
+              className="min-h-10 flex-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-sm text-white outline-none transition focus:border-cyan-300 sm:w-48 sm:flex-none disabled:cursor-not-allowed disabled:opacity-50"
+              value={globalBranch}
+              onChange={(e) => setGlobalBranch(e.target.value)}
+              disabled={user?.role?.toLowerCase() !== 'admin'}
+              id="branch"
+            >
+              <option className="bg-slate-950" value="all">
+                All branches
+              </option>
+              <option className="bg-slate-950" value="indiranagar">
+                Bengaluru Indiranagar
+              </option>
+              <option className="bg-slate-950" value="mumbai-bkc">
+                Mumbai BKC
+              </option>
+              <option className="bg-slate-950" value="gurugram-cyber-city">
+                Gurugram Cyber City
+              </option>
+              <option className="bg-slate-950" value="hyderabad">
+                Hyderabad HITEC
+              </option>
+              <option className="bg-slate-950" value="bangalore">
+                Bangalore Koramangala
+              </option>
+              <option className="bg-slate-950" value="chennai">
+                Chennai OMR
+              </option>
+            </select>
+          </div>
+        )}
       </div>
 
       <nav className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
@@ -554,7 +625,92 @@ function TopNavbar() {
   )
 }
 
-function Dashboard() {
+function Dashboard({ globalBranch }) {
+  const [timeframe, setTimeframe] = useState('week')
+  const [dbStats, setDbStats] = useState(null)
+  const [loadingStats, setLoadingStats] = useState(true)
+  const { token } = useAuth()
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const url = globalBranch && globalBranch !== 'all'
+          ? `/api/dashboard/stats?branch=${globalBranch}`
+          : '/api/dashboard/stats';
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          setDbStats(data)
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard stats:', err)
+      } finally {
+        setLoadingStats(false)
+      }
+    }
+    if (token) {
+      fetchStats()
+    }
+  }, [token, globalBranch])
+
+  // Scale chart utilization relative to live database occupancy
+  const baseScale = dbStats ? (dbStats.occupancyRate / 74) : 1
+  const timeframeData = timeframe === 'week'
+    ? weekChartData
+    : timeframe === 'month'
+      ? monthChartData
+      : yearChartData;
+
+  const currentChartData = timeframeData.map(item => ({
+    ...item,
+    value: Math.min(100, Math.round(item.value * baseScale))
+  }))
+
+  const currentChartTitle = timeframe === 'week'
+    ? 'Weekly desk utilization'
+    : timeframe === 'month'
+      ? 'Monthly desk utilization'
+      : 'Yearly desk utilization';
+
+  const displayStats = [
+    {
+      label: 'Total occupancy',
+      value: dbStats ? `${dbStats.occupancyRate}%` : '84%',
+      change: '+5.8%',
+      detail: dbStats ? `${dbStats.occupiedSeats} / ${dbStats.totalSeats} desks in use` : 'Peak utilization',
+      accent: 'from-emerald-400 to-teal-500',
+      icon: TrendingUp
+    },
+    {
+      label: 'Open desks',
+      value: dbStats ? `${dbStats.availableSeats}` : '392',
+      change: 'Instant booking active',
+      detail: 'Available now',
+      accent: 'from-amber-300 to-orange-500',
+      icon: Sparkles
+    },
+    {
+      label: 'Active room bookings',
+      value: dbStats ? `${dbStats.activeRoomBookings}` : '0',
+      change: dbStats ? `${dbStats.totalRooms} suites online` : 'In use',
+      detail: 'Live conference booking',
+      accent: 'from-rose-300 to-pink-500',
+      icon: DoorOpen
+    },
+    {
+      label: 'Open tickets',
+      value: dbStats ? `${dbStats.openTickets}` : '0',
+      change: dbStats ? `Resolved: ${dbStats.resolvedTickets}` : 'Active Support Queue',
+      detail: 'Priority support handling',
+      accent: 'from-cyan-400 to-blue-500',
+      icon: Activity
+    }
+  ]
+
   return (
     <motion.div
       animate="animate"
@@ -565,7 +721,7 @@ function Dashboard() {
       variants={pageVariants}
     >
       <motion.section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" variants={staggerContainer}>
-        {stats.map((stat) => (
+        {displayStats.map((stat) => (
           <motion.article
             className="rounded-lg border border-white/10 bg-white/[0.07] p-4 shadow-2xl shadow-black/20 backdrop-blur-xl"
             key={stat.label}
@@ -584,9 +740,11 @@ function Dashboard() {
                 <p className="mt-3 text-3xl font-semibold text-white">{stat.value}</p>
               </div>
               <motion.div
-                className={`h-10 w-10 rounded-lg bg-gradient-to-br ${stat.accent} opacity-90`}
+                className={`h-10 w-10 rounded-lg bg-gradient-to-br ${stat.accent} opacity-90 flex items-center justify-center text-slate-950`}
                 whileHover={{ rotate: 8, scale: 1.08 }}
-              />
+              >
+                {stat.icon && <stat.icon className="h-5 w-5 stroke-[2]" />}
+              </motion.div>
             </div>
             <div className="mt-5 flex items-center justify-between gap-3 text-sm">
               <span className="font-medium text-emerald-300">{stat.change}</span>
@@ -605,25 +763,45 @@ function Dashboard() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm text-slate-400">Occupancy trend</p>
-              <h2 className="mt-1 text-lg font-semibold text-white">Weekly desk utilization</h2>
+              <h2 className="mt-1 text-lg font-semibold text-white">{currentChartTitle}</h2>
             </div>
             <div className="flex rounded-lg border border-white/10 bg-black/20 p-1 text-sm text-slate-400">
-              <button className="rounded-md bg-white px-3 py-1.5 font-medium text-slate-950">Week</button>
-              <button className="px-3 py-1.5 transition hover:text-white">Month</button>
-              <button className="px-3 py-1.5 transition hover:text-white">Year</button>
+              <button
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition duration-150 cursor-pointer ${timeframe === 'week' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
+                  }`}
+                onClick={() => setTimeframe('week')}
+              >
+                Week
+              </button>
+              <button
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition duration-150 cursor-pointer ${timeframe === 'month' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
+                  }`}
+                onClick={() => setTimeframe('month')}
+              >
+                Month
+              </button>
+              <button
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition duration-150 cursor-pointer ${timeframe === 'year' ? 'bg-white text-slate-950 shadow-sm' : 'text-slate-400 hover:text-white'
+                  }`}
+                onClick={() => setTimeframe('year')}
+              >
+                Year
+              </button>
             </div>
           </div>
 
-          <div className="mt-8 h-72 rounded-lg border border-white/10 bg-black/20 p-4 backdrop-blur-xl">
+          <div className="mt-8 h-[480px] rounded-lg border border-white/10 bg-black/20 pt-8 pb-4 px-4 backdrop-blur-xl">
             <div className="flex h-full items-end gap-3 sm:gap-5">
-              {chartData.map((item, index) => (
+              {currentChartData.map((item, index) => (
                 <div className="flex h-full min-w-0 flex-1 flex-col justify-end gap-3" key={item.day}>
                   <div className="relative flex flex-1 items-end rounded-md bg-white/[0.03]">
                     <motion.div
+                      key={`${timeframe}-${index}`}
                       animate={{ scaleY: 1 }}
-                      className={`chart-bar ${item.heightClass} w-full rounded-md bg-gradient-to-t from-cyan-500 to-emerald-300 shadow-lg shadow-cyan-950/40`}
+                      className="w-full rounded-md bg-gradient-to-t from-cyan-500 to-emerald-300 shadow-lg shadow-cyan-950/40"
                       initial={{ scaleY: 0 }}
-                      transition={{ delay: 0.15 + index * 0.08, duration: 0.7, ease: 'easeOut' }}
+                      style={{ height: `${item.value}%`, transformOrigin: 'bottom' }}
+                      transition={{ delay: 0.05 + index * 0.05, duration: 0.6, ease: 'easeOut' }}
                       whileHover={{ filter: 'brightness(1.18)' }}
                     />
                     <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-slate-400">
@@ -892,8 +1070,8 @@ function FloorMapPage() {
                   {seats.map((seat) => (
                     <motion.button
                       className={`group relative aspect-square rounded-lg border text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-cyan-300 ${selectedSeat?.id === seat.id
-                          ? 'ring-2 ring-cyan-300 ring-offset-2 ring-offset-[#0a0c11]'
-                          : ''
+                        ? 'ring-2 ring-cyan-300 ring-offset-2 ring-offset-[#0a0c11]'
+                        : ''
                         } ${statusStyles[seat.status]}`}
                       key={seat.id}
                       layout
@@ -950,10 +1128,10 @@ function FloorMapPage() {
                 return (
                   <motion.button
                     className={`w-full rounded-lg border px-4 py-3 text-left transition ${branch.value === activeBranch
-                        ? 'border-cyan-300/40 bg-cyan-300/10 shadow-[0_0_8px_rgba(34,211,238,0.1)]'
-                        : isAllowed
-                          ? 'border-white/10 bg-black/20 hover:bg-white/[0.04] cursor-pointer'
-                          : 'border-white/5 bg-black/40 opacity-45 cursor-not-allowed'
+                      ? 'border-cyan-300/40 bg-cyan-300/10 shadow-[0_0_8px_rgba(34,211,238,0.1)]'
+                      : isAllowed
+                        ? 'border-white/10 bg-black/20 hover:bg-white/[0.04] cursor-pointer'
+                        : 'border-white/5 bg-black/40 opacity-45 cursor-not-allowed'
                       }`}
                     key={branch.value}
                     onClick={() => {
@@ -1039,7 +1217,10 @@ function FloorMapPage() {
                   <div className="mt-4 space-y-3 text-sm">
                     <div className="flex items-center justify-between gap-3">
                       <span className="text-slate-400">Status</span>
-                      <span className={`rounded-full border px-3 py-1 text-xs ${statusStyles[selectedSeat.status]}`}>
+                      <span className={`rounded-full border px-3 py-1 text-xs flex items-center gap-1 ${statusStyles[selectedSeat.status]}`}>
+                        {selectedSeat.status === 'available' && <CheckCircle className="h-3 w-3 stroke-[2]" />}
+                        {selectedSeat.status === 'occupied' && <AlertCircle className="h-3 w-3 stroke-[2]" />}
+                        {selectedSeat.status === 'reserved' && <Clock className="h-3 w-3 stroke-[2]" />}
                         {statusLabels[selectedSeat.status]}
                       </span>
                     </div>
@@ -1287,10 +1468,10 @@ function VisitorManagementPage() {
     >
       <motion.section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" variants={staggerContainer}>
         {[
-          { label: 'Inside now', value: visitorCounts.checkedIn, helper: 'Live visitors', accent: 'from-emerald-400 to-teal-500' },
-          { label: 'Expected', value: visitorCounts.expected, helper: 'Scheduled today', accent: 'from-cyan-400 to-sky-500' },
-          { label: 'Checked out', value: visitorCounts.checkedOut, helper: 'Completed visits', accent: 'from-slate-300 to-slate-500' },
-          { label: 'Delayed', value: visitorCounts.delayed, helper: 'Needs follow-up', accent: 'from-amber-300 to-orange-500' },
+          { label: 'Inside now', value: visitorCounts.checkedIn, helper: 'Live visitors', accent: 'from-emerald-400 to-teal-500', icon: UserCheck },
+          { label: 'Expected', value: visitorCounts.expected, helper: 'Scheduled today', accent: 'from-cyan-400 to-sky-500', icon: Clock },
+          { label: 'Checked out', value: visitorCounts.checkedOut, helper: 'Completed visits', accent: 'from-slate-300 to-slate-500', icon: CheckCircle },
+          { label: 'Delayed', value: visitorCounts.delayed, helper: 'Needs follow-up', accent: 'from-amber-300 to-orange-500', icon: AlertTriangle },
         ].map((metric) => (
           <motion.article
             className="rounded-lg border border-white/10 bg-white/[0.07] p-4 shadow-2xl shadow-black/20 backdrop-blur-xl"
@@ -1304,7 +1485,12 @@ function VisitorManagementPage() {
                 <p className="mt-3 text-3xl font-semibold text-white">{metric.value}</p>
                 <p className="mt-2 text-sm text-slate-500">{metric.helper}</p>
               </div>
-              <span className={`h-10 w-10 rounded-lg bg-gradient-to-br ${metric.accent}`} />
+              <motion.div
+                className={`h-10 w-10 rounded-lg bg-gradient-to-br ${metric.accent} opacity-90 flex items-center justify-center text-slate-950`}
+                whileHover={{ rotate: 8, scale: 1.08 }}
+              >
+                {metric.icon && <metric.icon className="h-5 w-5 stroke-[2]" />}
+              </motion.div>
             </div>
           </motion.article>
         ))}
@@ -1399,7 +1585,11 @@ function VisitorManagementPage() {
                       <p className="break-words">{visitor.purpose}</p>
                     </div>
                     <div>
-                      <span className={`inline-flex rounded-full border px-3 py-1 text-xs ${visitorStatuses[visitor.status].className}`}>
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs ${visitorStatuses[visitor.status].className}`}>
+                        {visitor.status === 'checkedIn' && <CheckCircle className="h-3 w-3 stroke-[2]" />}
+                        {visitor.status === 'checkedOut' && <UserCheck className="h-3 w-3 stroke-[2]" />}
+                        {visitor.status === 'expected' && <Clock className="h-3 w-3 stroke-[2]" />}
+                        {visitor.status === 'delayed' && <AlertTriangle className="h-3 w-3 stroke-[2]" />}
                         {visitorStatuses[visitor.status].label}
                       </span>
                       <p className="mt-2 text-xs text-slate-500">
@@ -1408,19 +1598,21 @@ function VisitorManagementPage() {
                     </div>
                     <div className="flex min-w-0 flex-wrap gap-2">
                       <button
-                        className="min-h-9 flex-1 rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40 xl:flex-none"
+                        className="min-h-9 flex-1 rounded-lg border border-white/10 px-3 py-2 text-xs text-slate-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40 xl:flex-none flex items-center gap-1 cursor-pointer"
                         disabled={visitor.status === 'checkedIn'}
                         onClick={() => checkInVisitor(visitor.id)}
                         type="button"
                       >
+                        <Check className="h-3.5 w-3.5 stroke-[2.5]" />
                         Check in
                       </button>
                       <button
-                        className="min-h-9 flex-1 rounded-lg bg-white px-3 py-2 text-xs font-medium text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40 xl:flex-none"
+                        className="min-h-9 flex-1 rounded-lg bg-white px-3 py-2 text-xs font-medium text-slate-950 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40 xl:flex-none flex items-center gap-1 cursor-pointer"
                         disabled={visitor.status !== 'checkedIn'}
                         onClick={() => checkOutVisitor(visitor.id)}
                         type="button"
                       >
+                        <LogOut className="h-3.5 w-3.5 stroke-[2.5]" />
                         Check out
                       </button>
                     </div>
@@ -1482,9 +1674,10 @@ function VisitorManagementPage() {
               value={newVisitor.purpose}
             />
             <button
-              className="min-h-11 rounded-lg bg-white px-4 text-sm font-medium text-slate-950 transition hover:bg-slate-200"
+              className="min-h-11 rounded-lg bg-white px-4 text-sm font-bold text-slate-950 transition hover:bg-slate-200 flex items-center justify-center gap-1.5 cursor-pointer"
               type="submit"
             >
+              <UserPlus className="h-4 w-4 stroke-[2]" />
               Add expected visitor
             </button>
           </form>

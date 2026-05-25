@@ -1,17 +1,21 @@
 import { useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Sparkles, Phone, FileText, CheckCircle, Plus, Search, Filter, Trash2, Edit, Save } from 'lucide-react'
 
 const STAGES = [
-  { id: 'lead', label: 'Lead', color: 'border-cyan-400/40 bg-cyan-400/5 text-cyan-300 shadow-cyan-950/20 hover:border-cyan-400/60', hoverGlow: 'rgba(34,211,238,0.12)', borderActive: 'border-cyan-400', badgeColor: 'bg-cyan-400/10 text-cyan-300 border-cyan-400/20' },
-  { id: 'contacted', label: 'Contacted', color: 'border-amber-300/40 bg-amber-300/5 text-amber-200 shadow-amber-950/20 hover:border-amber-300/60', hoverGlow: 'rgba(252,211,77,0.12)', borderActive: 'border-amber-300', badgeColor: 'bg-amber-300/10 text-amber-200 border-amber-300/20' },
-  { id: 'proposal', label: 'Proposal', color: 'border-indigo-400/40 bg-indigo-400/5 text-indigo-300 shadow-indigo-950/20 hover:border-indigo-400/60', hoverGlow: 'rgba(129,140,248,0.12)', borderActive: 'border-indigo-400', badgeColor: 'bg-indigo-400/10 text-indigo-300 border-indigo-400/20' },
-  { id: 'converted', label: 'Converted', color: 'border-emerald-400/40 bg-emerald-400/5 text-emerald-200 shadow-emerald-950/20 hover:border-emerald-400/60', hoverGlow: 'rgba(52,211,153,0.12)', borderActive: 'border-emerald-400', badgeColor: 'bg-emerald-400/10 text-emerald-200 border-emerald-400/20' },
+  { id: 'lead', label: 'Lead', icon: Sparkles, color: 'border-cyan-400/40 bg-cyan-400/5 text-cyan-300 shadow-cyan-950/20 hover:border-cyan-400/60', hoverGlow: 'rgba(34,211,238,0.12)', borderActive: 'border-cyan-400', badgeColor: 'bg-cyan-400/10 text-cyan-300 border-cyan-400/20' },
+  { id: 'contacted', label: 'Contacted', icon: Phone, color: 'border-amber-300/40 bg-amber-300/5 text-amber-200 shadow-amber-950/20 hover:border-amber-300/60', hoverGlow: 'rgba(252,211,77,0.12)', borderActive: 'border-amber-300', badgeColor: 'bg-amber-300/10 text-amber-200 border-amber-300/20' },
+  { id: 'proposal', label: 'Proposal', icon: FileText, color: 'border-indigo-400/40 bg-indigo-400/5 text-indigo-300 shadow-indigo-950/20 hover:border-indigo-400/60', hoverGlow: 'rgba(129,140,248,0.12)', borderActive: 'border-indigo-400', badgeColor: 'bg-indigo-400/10 text-indigo-300 border-indigo-400/20' },
+  { id: 'converted', label: 'Converted', icon: CheckCircle, color: 'border-emerald-400/40 bg-emerald-400/5 text-emerald-200 shadow-emerald-950/20 hover:border-emerald-400/60', hoverGlow: 'rgba(52,211,153,0.12)', borderActive: 'border-emerald-400', badgeColor: 'bg-emerald-400/10 text-emerald-200 border-emerald-400/20' },
 ]
 
 const BRANCHES = {
   'indiranagar': 'Bengaluru Indiranagar',
   'mumbai-bkc': 'Mumbai BKC',
   'gurugram-cyber-city': 'Gurugram Cyber City',
+  'hyderabad': 'Hyderabad HITEC',
+  'bangalore': 'Bangalore Koramangala',
+  'chennai': 'Chennai OMR',
 }
 
 const initialLeads = [
@@ -475,9 +479,7 @@ export default function CRMPage() {
           className="min-h-10 shrink-0 inline-flex items-center justify-center gap-2 rounded-lg bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-slate-200 cursor-pointer shadow-lg shadow-white/5 active:scale-95"
           onClick={() => setIsAddModalOpen(true)}
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-          </svg>
+          <Plus className="h-4 w-4 stroke-[2.5]" />
           Add New Lead
         </button>
       </section>
@@ -511,7 +513,7 @@ export default function CRMPage() {
               {/* Column Header */}
               <div className="flex items-center justify-between border-b border-white/5 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <span className={`inline-block h-2 w-2 rounded-full border ${stage.color.split(' ')[0]}`} />
+                  {stage.icon && <stage.icon className={`h-4 w-4 stroke-[2] ${stage.color.split(' ')[2]}`} />}
                   <h3 className="font-semibold text-white text-sm">{stage.label}</h3>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${stage.badgeColor}`}>
                     {stageLeads.length}
@@ -874,9 +876,7 @@ export default function CRMPage() {
                   onClick={() => handleDeleteLead(selectedLead.id, selectedLead.company)}
                   type="button"
                 >
-                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
+                  <Trash2 className="h-3.5 w-3.5 stroke-[2.2]" />
                   Delete Lead
                 </button>
                 <button
@@ -1063,9 +1063,10 @@ export default function CRMPage() {
                     Cancel
                   </button>
                   <button
-                    className="min-h-10 rounded-lg bg-white px-5 text-sm font-bold text-slate-950 transition hover:bg-slate-200 cursor-pointer"
+                    className="min-h-10 rounded-lg bg-white px-5 text-sm font-bold text-slate-950 transition hover:bg-slate-200 cursor-pointer flex items-center gap-1.5"
                     type="submit"
                   >
+                    <Save className="h-4 w-4 stroke-[2]" />
                     Create Lead Card
                   </button>
                 </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { CheckCircle, Clock, AlertTriangle, Search, Filter } from 'lucide-react'
 import { useAuth } from './AuthContext'
 
 const INITIAL_INVOICES = [
@@ -89,7 +90,10 @@ const BRANCH_LABELS = {
   'all': 'All Branches',
   'indiranagar': 'Bengaluru Indiranagar',
   'mumbai-bkc': 'Mumbai BKC',
-  'gurugram-cyber-city': 'Gurugram Cyber City'
+  'gurugram-cyber-city': 'Gurugram Cyber City',
+  'hyderabad': 'Hyderabad HITEC',
+  'bangalore': 'Bangalore Koramangala',
+  'chennai': 'Chennai OMR'
 }
 
 export default function BillingPage() {
@@ -332,11 +336,14 @@ export default function BillingPage() {
                         </td>
                         {/* Status glowing badges */}
                         <td className="px-4 py-3 text-center">
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border shadow-[0_0_10px_rgba(0,0,0,0.15)] ${
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border shadow-[0_0_10px_rgba(0,0,0,0.15)] ${
                             inv.status === 'Paid' ? 'bg-[#0d2218] border-emerald-500/20 text-emerald-400' :
                             inv.status === 'Pending' ? 'bg-[#22170d] border-amber-500/20 text-amber-400' :
                             'bg-[#220d0d] border-rose-500/20 text-rose-400 animate-pulse'
                           }`}>
+                            {inv.status === 'Paid' && <CheckCircle className="h-2.5 w-2.5" />}
+                            {inv.status === 'Pending' && <Clock className="h-2.5 w-2.5" />}
+                            {inv.status === 'Overdue' && <AlertTriangle className="h-2.5 w-2.5" />}
                             {inv.status}
                           </span>
                         </td>

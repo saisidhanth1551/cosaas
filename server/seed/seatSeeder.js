@@ -57,7 +57,9 @@ const seedSeats = async () => {
         const seatNum = (index % 8) + 1;
         const seatNumber = `${seatLetter}${seatNum}`;
 
-        const status = PATTERNS[index % PATTERNS.length];
+        const branchIndex = BRANCHES.indexOf(branch);
+        const offset = (index + (branchIndex * 7)) % PATTERNS.length;
+        const status = PATTERNS[offset];
 
         const seatRecord = {
           seatNumber,

@@ -860,6 +860,66 @@ function Dashboard({ globalBranch }) {
   )
 }
 
+const seatCoordinates = {
+  // A1-A2: Reception
+  'A1': { x: 120, y: 495, zone: 'Reception' },
+  'A2': { x: 180, y: 495, zone: 'Reception' },
+  // A3-A4: Pantry counter
+  'A3': { x: 790, y: 490, zone: 'Pantry' },
+  'A4': { x: 850, y: 490, zone: 'Pantry' },
+  // A5-A8: Lounge Area
+  'A5': { x: 395, y: 460, zone: 'Collaboration Lounge' },
+  'A6': { x: 445, y: 460, zone: 'Collaboration Lounge' },
+  'A7': { x: 575, y: 460, zone: 'Collaboration Lounge' },
+  'A8': { x: 625, y: 460, zone: 'Collaboration Lounge' },
+
+  // B1-B2: Executive Cabin 1
+  'B1': { x: 95, y: 110, zone: 'Executive Cabin 1' },
+  'B2': { x: 95, y: 155, zone: 'Executive Cabin 1' },
+  // B3-B4: Executive Cabin 2
+  'B3': { x: 185, y: 110, zone: 'Executive Cabin 2' },
+  'B4': { x: 185, y: 155, zone: 'Executive Cabin 2' },
+  // B5-B6: Executive Cabin 3
+  'B5': { x: 275, y: 110, zone: 'Executive Cabin 3' },
+  'B6': { x: 275, y: 155, zone: 'Executive Cabin 3' },
+
+  // B7-B8, C1-C2: Phone Booths
+  'B7': { x: 842, y: 85, zone: 'Phone Booth 1' },
+  'B8': { x: 917, y: 85, zone: 'Phone Booth 2' },
+  'C1': { x: 842, y: 165, zone: 'Phone Booth 3' },
+  'C2': { x: 917, y: 165, zone: 'Phone Booth 4' },
+
+  // C3-C6: Small Meeting Room A
+  'C3': { x: 795, y: 290, zone: 'Meeting Room A' },
+  'C4': { x: 795, y: 335, zone: 'Meeting Room A' },
+  'C5': { x: 895, y: 290, zone: 'Meeting Room A' },
+  'C6': { x: 895, y: 335, zone: 'Meeting Room A' },
+
+  // C7-C8, D1-D2: Small Meeting Room B
+  'C7': { x: 575, y: 290, zone: 'Meeting Room B' },
+  'C8': { x: 575, y: 335, zone: 'Meeting Room B' },
+  'D1': { x: 665, y: 290, zone: 'Meeting Room B' },
+  'D2': { x: 665, y: 335, zone: 'Meeting Room B' },
+
+  // D3-D8, E5-E8: Open Workspace
+  'D3': { x: 110, y: 275, zone: 'Open Co-Working Zone' },
+  'D4': { x: 160, y: 275, zone: 'Open Co-Working Zone' },
+  'D5': { x: 110, y: 335, zone: 'Open Co-Working Zone' },
+  'D6': { x: 160, y: 335, zone: 'Open Co-Working Zone' },
+  'D7': { x: 260, y: 275, zone: 'Open Co-Working Zone' },
+  'D8': { x: 310, y: 275, zone: 'Open Co-Working Zone' },
+  'E5': { x: 360, y: 275, zone: 'Open Co-Working Zone' },
+  'E6': { x: 260, y: 335, zone: 'Open Co-Working Zone' },
+  'E7': { x: 310, y: 335, zone: 'Open Co-Working Zone' },
+  'E8': { x: 360, y: 335, zone: 'Open Co-Working Zone' },
+
+  // E1-E4: Large Conference Room
+  'E1': { x: 570, y: 110, zone: 'Large Conference Room' },
+  'E2': { x: 620, y: 110, zone: 'Large Conference Room' },
+  'E3': { x: 670, y: 110, zone: 'Large Conference Room' },
+  'E4': { x: 720, y: 110, zone: 'Large Conference Room' }
+}
+
 function FloorMapPage() {
   const { user, token } = useAuth()
   const [activeBranch, setActiveBranch] = useState(() => {
@@ -910,7 +970,15 @@ function FloorMapPage() {
     }
   }, [token])
 
-  const seats = seatMap[activeBranch] || []
+  const seats = (seatMap[activeBranch] || []).map(seat => {
+    const coords = seatCoordinates[seat.id] || { x: 0, y: 0, zone: 'Open Co-Working Zone' }
+    return {
+      ...seat,
+      x: coords.x,
+      y: coords.y,
+      zone: coords.zone
+    }
+  })
   const activeBranchData = floorBranches.find((branch) => branch.value === activeBranch)
   const branchLabel = activeBranchData?.label
   const counts = seats.reduce(
@@ -1003,7 +1071,7 @@ function FloorMapPage() {
         transition={{ duration: 0.28, ease: 'easeOut' }}
         variants={pageVariants}
       >
-        <section className="grid gap-5 xl:grid-cols-[1fr_360px]">
+        <section className="flex flex-col gap-6">
           <motion.article
             className="rounded-lg border border-white/10 bg-white/[0.07] p-4 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-5"
             transition={springTransition}
@@ -1058,68 +1126,239 @@ function FloorMapPage() {
               ))}
             </div>
 
-            <div className="mt-6 overflow-x-auto rounded-lg border border-white/10 bg-black/20 p-3 backdrop-blur-xl sm:p-5">
-              <div className="min-w-[620px]">
-                <div className="mb-4 grid grid-cols-[1fr_1.3fr_1fr] gap-3 text-center text-xs text-slate-500">
-                  <span className="rounded-md border border-white/10 bg-white/[0.03] py-2">Hot Desk Bay</span>
-                  <span className="rounded-md border border-white/10 bg-white/[0.03] py-2">Meeting Pods</span>
-                  <span className="rounded-md border border-white/10 bg-white/[0.03] py-2">Focus Zone</span>
+            <div className="mt-6 rounded-lg border border-white/10 bg-black/40 p-3 backdrop-blur-xl sm:p-5">
+              <div className="w-full">
+                <div className="mb-4 flex items-center justify-between px-2">
+                  <div className="flex items-center gap-4 text-xs">
+                    <span className="text-slate-400 font-semibold tracking-wider uppercase">METRIC LEGEND:</span>
+                    {Object.keys(statusLabels).map((status) => (
+                      <span className="inline-flex items-center gap-2" key={status}>
+                        <span className={`h-3.5 w-3.5 rounded-md border ${
+                          status === 'available' ? 'border-emerald-400 bg-emerald-400/20' :
+                          status === 'occupied' ? 'border-rose-500 bg-rose-500/20' :
+                          'border-amber-400 bg-amber-400/20'
+                        }`} />
+                        <span className="text-slate-300 font-semibold">{statusLabels[status]}</span>
+                      </span>
+                    ))}
+                  </div>
+                  <span className="text-[11px] font-mono font-bold text-cyan-400 uppercase tracking-widest bg-cyan-950/40 border border-cyan-800/30 px-2.5 py-1 rounded-full animate-pulse">
+                    LIVE VIEW · {branchLabel}
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-8 gap-3">
-                  {seats.map((seat) => (
-                    <motion.button
-                      className={`group relative aspect-square rounded-lg border text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-cyan-300 ${selectedSeat?.id === seat.id
-                        ? 'ring-2 ring-cyan-300 ring-offset-2 ring-offset-[#0a0c11]'
-                        : ''
-                        } ${statusStyles[seat.status]}`}
-                      key={seat.id}
-                      layout
-                      onClick={() => openSeatModal(seat)}
-                      title={`${seat.id} · ${statusLabels[seat.status]} · ${seat.assignedTo || 'Unassigned'}`}
-                      whileHover={{
-                        y: -4,
-                        scale: 1.05,
-                        boxShadow: '0 16px 34px rgba(0, 0, 0, 0.35)',
-                      }}
-                      whileTap={{ scale: 0.96 }}
-                      type="button"
-                    >
-                      <span className="flex h-full flex-col items-center justify-center gap-1">
-                        <span>{seat.id}</span>
-                        {seat.assignedTo && (
-                          <span className="max-w-14 truncate text-[10px] font-medium opacity-80">
-                            {seat.assignedTo}
-                          </span>
-                        )}
-                      </span>
-                      <span className="pointer-events-none absolute -top-10 left-1/2 z-20 hidden w-max -translate-x-1/2 rounded-md border border-white/10 bg-slate-950/95 px-2 py-1 text-[11px] font-medium text-slate-200 shadow-xl group-hover:block">
-                        {statusLabels[seat.status]} · {seat.assignedTo || 'Unassigned'}
-                      </span>
-                    </motion.button>
-                  ))}
-                </div>
+                <div className="relative border border-white/10 rounded-lg overflow-hidden bg-slate-950/80 shadow-2xl">
+                  <svg viewBox="0 0 1000 600" className="w-full h-auto select-none block">
+                    <defs>
+                      <pattern id="floor-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.02)" strokeWidth="1" />
+                      </pattern>
+                      <linearGradient id="glass-walls" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="rgba(255, 255, 255, 0.05)" />
+                        <stop offset="100%" stopColor="rgba(255, 255, 255, 0.01)" />
+                      </linearGradient>
+                      <filter id="glow-emerald">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
+                      <filter id="glow-rose">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
+                      <filter id="glow-amber">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge>
+                          <feMergeNode in="coloredBlur"/>
+                          <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                      </filter>
+                    </defs>
 
-                <div className="mt-5 flex flex-wrap gap-3 text-xs text-slate-400">
-                  {Object.keys(statusLabels).map((status) => (
-                    <span className="inline-flex items-center gap-2" key={status}>
-                      <span className={`h-3 w-3 rounded-full border ${statusStyles[status]}`} />
-                      {statusLabels[status]}
-                    </span>
-                  ))}
+                    {/* Floor Base */}
+                    <rect width="1000" height="600" fill="url(#floor-grid)" />
+
+                    {/* Architectural Spatial Boundaries */}
+
+                    {/* 1. Executive Cabins (Top Left) */}
+                    <g>
+                      <rect x="50" y="50" width="270" height="150" fill="url(#glass-walls)" stroke="rgba(34, 211, 238, 0.25)" strokeWidth="1.5" strokeDasharray="3 3" />
+                      {/* Cabins dividers */}
+                      <line x1="140" y1="50" x2="140" y2="200" stroke="rgba(34, 211, 238, 0.15)" strokeWidth="1.5" />
+                      <line x1="230" y1="50" x2="230" y2="200" stroke="rgba(34, 211, 238, 0.15)" strokeWidth="1.5" />
+                      {/* Labels */}
+                      <text x="95" y="75" textAnchor="middle" className="text-[10px] font-extrabold fill-cyan-200 uppercase tracking-widest font-mono">CABIN 1</text>
+                      <text x="185" y="75" textAnchor="middle" className="text-[10px] font-extrabold fill-cyan-200 uppercase tracking-widest font-mono">CABIN 2</text>
+                      <text x="275" y="75" textAnchor="middle" className="text-[10px] font-extrabold fill-cyan-200 uppercase tracking-widest font-mono">CABIN 3</text>
+                    </g>
+
+                    {/* 2. Large Conference Room (Top Middle-Right) */}
+                    <g>
+                      <rect x="520" y="50" width="260" height="120" fill="url(#glass-walls)" stroke="rgba(129, 140, 248, 0.3)" strokeWidth="1.5" />
+                      {/* Boardroom Table */}
+                      <rect x="555" y="95" width="190" height="30" rx="15" fill="rgba(129, 140, 248, 0.08)" stroke="rgba(129, 140, 248, 0.3)" strokeWidth="1" />
+                      <text x="650" y="75" textAnchor="middle" className="text-[10px] font-extrabold fill-indigo-200 uppercase tracking-widest font-mono">BOARDROOM</text>
+                    </g>
+
+                    {/* 3. Phone Booths (Top Right) */}
+                    <g>
+                      <rect x="810" y="50" width="140" height="150" fill="url(#glass-walls)" stroke="rgba(236, 72, 153, 0.25)" strokeWidth="1.5" strokeDasharray="3 3" />
+                      {/* Dividers */}
+                      <line x1="880" y1="50" x2="880" y2="200" stroke="rgba(236, 72, 153, 0.15)" strokeWidth="1.5" />
+                      <line x1="810" y1="125" x2="950" y2="125" stroke="rgba(236, 72, 153, 0.15)" strokeWidth="1.5" />
+                      {/* Labels */}
+                      <text x="845" y="70" textAnchor="middle" className="text-[8px] font-extrabold fill-pink-200 uppercase tracking-widest font-mono">PB 1</text>
+                      <text x="915" y="70" textAnchor="middle" className="text-[8px] font-extrabold fill-pink-200 uppercase tracking-widest font-mono">PB 2</text>
+                      <text x="845" y="145" textAnchor="middle" className="text-[8px] font-extrabold fill-pink-200 uppercase tracking-widest font-mono">PB 3</text>
+                      <text x="915" y="145" textAnchor="middle" className="text-[8px] font-extrabold fill-pink-200 uppercase tracking-widest font-mono">PB 4</text>
+                    </g>
+
+                    {/* 4. Open Hot Desk Co-Working Zone (Middle Left) */}
+                    <g>
+                      <rect x="50" y="230" width="440" height="160" fill="rgba(16, 185, 129, 0.02)" stroke="rgba(16, 185, 129, 0.2)" strokeWidth="1.5" />
+                      {/* Desks Islands */}
+                      <rect x="90" y="295" width="90" height="20" rx="4" fill="rgba(16, 185, 129, 0.05)" stroke="rgba(16, 185, 129, 0.2)" strokeWidth="1" />
+                      <rect x="240" y="295" width="140" height="20" rx="4" fill="rgba(16, 185, 129, 0.05)" stroke="rgba(16, 185, 129, 0.2)" strokeWidth="1" />
+                      <text x="270" y="250" textAnchor="middle" className="text-[10px] font-extrabold fill-emerald-200 uppercase tracking-widest font-mono">OPEN HOT DESKS ZONE</text>
+                    </g>
+
+                    {/* 5. Small Meeting Room B (Middle Center-Right) */}
+                    <g>
+                      <rect x="520" y="240" width="200" height="140" fill="url(#glass-walls)" stroke="rgba(34, 211, 238, 0.25)" strokeWidth="1.5" />
+                      {/* Center Table */}
+                      <rect x="585" y="295" width="70" height="30" rx="10" fill="rgba(34, 211, 238, 0.05)" stroke="rgba(34, 211, 238, 0.2)" strokeWidth="1" />
+                      <text x="620" y="265" textAnchor="middle" className="text-[9px] font-extrabold fill-cyan-200 uppercase tracking-widest font-mono">MEETING ROOM B</text>
+                    </g>
+
+                    {/* 6. Small Meeting Room A (Middle Right) */}
+                    <g>
+                      <rect x="740" y="240" width="210" height="140" fill="url(#glass-walls)" stroke="rgba(34, 211, 238, 0.25)" strokeWidth="1.5" />
+                      {/* Center Table */}
+                      <rect x="805" y="295" width="80" height="30" rx="10" fill="rgba(34, 211, 238, 0.05)" stroke="rgba(34, 211, 238, 0.2)" strokeWidth="1" />
+                      <text x="845" y="265" textAnchor="middle" className="text-[9px] font-extrabold fill-cyan-200 uppercase tracking-widest font-mono">MEETING ROOM A</text>
+                    </g>
+
+                    {/* 7. Reception & Entry Lobby (Bottom Left) */}
+                    <g>
+                      <rect x="50" y="420" width="250" height="130" fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+                      {/* Reception Desk */}
+                      <rect x="100" y="450" width="100" height="20" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.15)" strokeWidth="1" />
+                      {/* Glass doors entrance indicator */}
+                      <line x1="120" y1="550" x2="180" y2="550" stroke="rgba(34, 211, 238, 0.5)" strokeWidth="3" />
+                      <text x="150" y="535" textAnchor="middle" className="text-[9px] font-extrabold fill-slate-200 uppercase tracking-widest font-mono">RECEPTION & ENTRANCE</text>
+                    </g>
+
+                    {/* 8. Collaboration Lounge (Bottom Center) */}
+                    <g>
+                      <rect x="330" y="420" width="360" height="130" fill="rgba(245, 158, 11, 0.02)" stroke="rgba(245, 158, 11, 0.2)" strokeWidth="1.5" />
+                      {/* Circular soft seats */}
+                      <circle cx="410" cy="485" r="20" fill="none" stroke="rgba(245, 158, 11, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
+                      <circle cx="610" cy="485" r="20" fill="none" stroke="rgba(245, 158, 11, 0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
+                      <text x="510" y="445" textAnchor="middle" className="text-[9px] font-extrabold fill-amber-200 uppercase tracking-widest font-mono">COLLABORATION LOUNGE</text>
+                    </g>
+
+                    {/* 9. Pantry & Cafeteria (Bottom Right) */}
+                    <g>
+                      <rect x="720" y="420" width="230" height="130" fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.15)" strokeWidth="1.5" />
+                      {/* Kitchen high counter */}
+                      <rect x="750" y="455" width="170" height="15" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+                      <text x="835" y="530" textAnchor="middle" className="text-[9px] font-extrabold fill-slate-200 uppercase tracking-widest font-mono">PANTRY & CAFETERIA</text>
+                    </g>
+
+                    {/* Hallways & Walkways Visual Path labels */}
+                    <text x="400" y="215" textAnchor="middle" className="text-[8px] font-bold fill-slate-300 uppercase tracking-widest font-mono">MAIN CORRIDOR A</text>
+                    <text x="400" y="408" textAnchor="middle" className="text-[8px] font-bold fill-slate-300 uppercase tracking-widest font-mono">MAIN CORRIDOR B</text>
+                    <text x="507" y="300" textAnchor="middle" className="text-[8px] font-bold fill-slate-300 uppercase tracking-widest font-mono" transform="rotate(-90, 507, 300)">CENTRAL CROSSING PASSAGE</text>
+
+                    {/* Render Interactive Coordinate seats */}
+                    {seats.map((seat) => {
+                      const isSelected = selectedSeat?.id === seat.id;
+                      
+                      let seatColorClass = "rgba(16, 185, 129, 0.15)";
+                      let seatStroke = "#10b981";
+                      let seatFilter = "url(#glow-emerald)";
+                      let seatHoverClass = "hover:fill-emerald-400/25";
+
+                      if (seat.status === 'occupied') {
+                        seatColorClass = "rgba(244, 63, 94, 0.12)";
+                        seatStroke = "#f43f5e";
+                        seatFilter = "url(#glow-rose)";
+                        seatHoverClass = "hover:fill-rose-500/25";
+                      } else if (seat.status === 'reserved') {
+                        seatColorClass = "rgba(245, 158, 11, 0.15)";
+                        seatStroke = "#f59e0b";
+                        seatFilter = "url(#glow-amber)";
+                        seatHoverClass = "hover:fill-amber-400/25";
+                      }
+
+                      return (
+                        <g 
+                          className="cursor-pointer group"
+                          key={seat.id}
+                          onClick={() => openSeatModal(seat)}
+                        >
+                          <title>{`${seat.id} · ${statusLabels[seat.status]} · ${seat.assignedTo || 'Unassigned'}`}</title>
+                          {/* Seat box */}
+                          <rect 
+                            x={seat.x - 13} 
+                            y={seat.y - 13} 
+                            width="26" 
+                            height="26" 
+                            rx="5"
+                            fill={seatColorClass} 
+                            stroke={seatStroke}
+                            strokeWidth={isSelected ? "2.5" : "1.2"}
+                            filter={seatFilter}
+                            className={`transition-all duration-200 ${seatHoverClass}`}
+                          />
+                          {/* Selected highlighted outer ring */}
+                          {isSelected && (
+                            <rect 
+                              x={seat.x - 17} 
+                              y={seat.y - 17} 
+                              width="34" 
+                              height="34" 
+                              rx="8"
+                              fill="none" 
+                              stroke="#22d3ee"
+                              strokeWidth="1.5"
+                              strokeDasharray="2 2"
+                            />
+                          )}
+                          {/* Seat identifier label */}
+                          <text 
+                            x={seat.x} 
+                            y={seat.y + 3} 
+                            textAnchor="middle" 
+                            className="text-[9px] font-black fill-white font-mono tracking-tighter"
+                          >
+                            {seat.id}
+                          </text>
+                        </g>
+                      )
+                    })}
+                  </svg>
                 </div>
               </div>
             </div>
           </motion.article>
 
           <motion.aside
-            className="rounded-lg border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl"
+            className="w-full rounded-lg border border-white/10 bg-white/[0.07] p-5 shadow-2xl shadow-black/20 backdrop-blur-xl"
             transition={springTransition}
-            whileHover={{ y: -3, borderColor: 'rgba(255,255,255,0.18)' }}
+            whileHover={{ borderColor: 'rgba(34, 211, 238, 0.24)' }}
           >
-            <p className="text-sm text-slate-400">Live branch summary</p>
-            <h2 className="mt-1 text-lg font-semibold text-white">Seat operations</h2>
-            <div className="mt-6 space-y-3">
+            <div>
+              <p className="text-sm text-slate-400">Live branch summary</p>
+              <h2 className="mt-1 text-lg font-semibold text-white">Seat operations & branches</h2>
+            </div>
+            
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
               {floorBranches.map((branch) => {
                 const branchSeats = seatMap[branch.value] || []
                 const availableSeats = branchSeats.filter((seat) => seat.status === 'available').length
@@ -1127,7 +1366,7 @@ function FloorMapPage() {
 
                 return (
                   <motion.button
-                    className={`w-full rounded-lg border px-4 py-3 text-left transition ${branch.value === activeBranch
+                    className={`w-full rounded-lg border p-4 text-left transition ${branch.value === activeBranch
                       ? 'border-cyan-300/40 bg-cyan-300/10 shadow-[0_0_8px_rgba(34,211,238,0.1)]'
                       : isAllowed
                         ? 'border-white/10 bg-black/20 hover:bg-white/[0.04] cursor-pointer'
@@ -1139,35 +1378,36 @@ function FloorMapPage() {
                       setActiveBranch(branch.value)
                       setSelectedSeat(null)
                     }}
-                    whileHover={isAllowed ? { x: 4 } : {}}
+                    whileHover={isAllowed ? { y: -2, x: 0 } : {}}
                     whileTap={isAllowed ? { scale: 0.98 } : {}}
                     disabled={!isAllowed}
                     type="button"
                   >
-                    <span className="flex items-center justify-between gap-3">
-                      <span className="flex items-center gap-1.5 text-sm font-medium text-white">
-                        {branch.label}
+                    <div className="flex flex-col justify-between h-full gap-3">
+                      <span className="flex items-center justify-between gap-1 text-sm font-medium text-white">
+                        <span>{branch.label}</span>
                         {!isAllowed && (
                           <span className="text-[9px] font-bold uppercase tracking-wider bg-white/10 px-1.5 py-0.5 rounded text-slate-400">
-                            🔒 Locked
+                            🔒 Lock
                           </span>
                         )}
                       </span>
-                      <span className="text-right text-sm text-emerald-300">
-                        {isAllowed ? `${availableSeats} open` : 'Locked'}
-                        <span className="block text-xs text-slate-500">{branch.deskRate}</span>
-                      </span>
-                    </span>
+                      <div className="flex items-end justify-between gap-2 mt-2">
+                        <span className="text-xs text-slate-400 font-mono">{branch.deskRate}</span>
+                        <span className="text-right text-sm font-bold text-emerald-400">
+                          {isAllowed ? `${availableSeats} open` : 'Locked'}
+                        </span>
+                      </div>
+                    </div>
                   </motion.button>
                 )
               })}
             </div>
 
-            <div className="mt-6 rounded-lg bg-white p-4 text-slate-950">
-              <p className="text-sm font-semibold">Booking rule</p>
-              <p className="mt-2 text-sm text-slate-600">
-                {activeBranchData?.checkIns} member check-ins today. Assignments convert available seats into reserved
-                seats for the selected client.
+            <div className="mt-6 rounded-lg bg-white/[0.04] border border-white/5 p-4 text-slate-300">
+              <p className="text-xs uppercase text-slate-500 font-semibold tracking-wider">Booking rule & daily check-ins</p>
+              <p className="mt-2 text-sm text-slate-400">
+                <span className="text-cyan-400 font-bold font-mono">{activeBranchData?.checkIns || 0}</span> member check-ins today at <span className="font-semibold text-white">{branchLabel}</span>. Seat assignments dynamically map database states between available, occupied, and reserved.
               </p>
             </div>
           </motion.aside>

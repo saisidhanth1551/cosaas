@@ -42,6 +42,7 @@ import BillingPage from './BillingPage'
 import ConferenceRoomsPage from './ConferenceRoomsPage'
 import TicketsPage from './TicketsPage'
 import SettingsPage from './SettingsPage'
+import { API_BASE } from './config'
 
 const BRANCHES = {
   'indiranagar': 'Bengaluru Indiranagar',
@@ -635,8 +636,8 @@ function Dashboard({ globalBranch }) {
     const fetchStats = async () => {
       try {
         const url = globalBranch && globalBranch !== 'all'
-          ? `/api/dashboard/stats?branch=${globalBranch}`
-          : '/api/dashboard/stats';
+          ? `${API_BASE}/api/dashboard/stats?branch=${globalBranch}`
+          : `${API_BASE}/api/dashboard/stats`;
         const response = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -947,7 +948,7 @@ function FloorMapPage() {
   useEffect(() => {
     const fetchAllSeats = async () => {
       try {
-        const response = await fetch('/api/seats', {
+        const response = await fetch(`${API_BASE}/api/seats`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -1029,7 +1030,7 @@ function FloorMapPage() {
     }
 
     try {
-      const response = await fetch(`/api/seats/${selectedSeat.id}`, {
+      const response = await fetch(`${API_BASE}/api/seats/${selectedSeat.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

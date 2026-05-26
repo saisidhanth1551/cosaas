@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { HelpCircle, Play, CheckCircle, Plus, Search, Filter, Trash2, Edit, Save } from 'lucide-react'
 import { useAuth } from './AuthContext'
+import { API_BASE } from './config'
 
 const floorBranches = [
   { label: 'Bengaluru Indiranagar', value: 'indiranagar' },
@@ -74,7 +75,7 @@ export default function TicketsPage() {
   const fetchTickets = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/tickets?branch=${activeBranch}`, {
+      const response = await fetch(`${API_BASE}/api/tickets?branch=${activeBranch}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -114,7 +115,7 @@ export default function TicketsPage() {
     if (!ticketTitle.trim() || !ticketDesc.trim() || !ticketReportedBy.trim()) return
 
     try {
-      const response = await fetch('/api/tickets', {
+      const response = await fetch(`${API_BASE}/api/tickets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +160,7 @@ export default function TicketsPage() {
   const handleUpdateSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch(`/api/tickets/${selectedTicket._id}`, {
+      const response = await fetch(`${API_BASE}/api/tickets/${selectedTicket._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

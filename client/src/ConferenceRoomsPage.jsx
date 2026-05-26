@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from './AuthContext'
+import { API_BASE } from './config'
 
 const floorBranches = [
   { label: 'Bengaluru Indiranagar', value: 'indiranagar', deskRate: '₹9,500/mo' },
@@ -63,7 +64,7 @@ export default function ConferenceRoomsPage() {
   const fetchRooms = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/rooms?branch=${activeBranch}`, {
+      const response = await fetch(`${API_BASE}/api/rooms?branch=${activeBranch}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -103,7 +104,7 @@ export default function ConferenceRoomsPage() {
     if (!organizer.trim()) return
 
     try {
-      const response = await fetch(`/api/rooms/${selectedRoom._id}/book`, {
+      const response = await fetch(`${API_BASE}/api/rooms/${selectedRoom._id}/book`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -35,6 +35,12 @@ CoSaaS is a modern, high-fidelity Software-as-a-Service (SaaS) web application d
 * **Conference Suite Bookings**: Fully interactive boardroom scheduling calendar.
 * **Support Ticket Desk**: Interactive ticketing suite showing real-time priority markers (Low, Medium, High, Critical), assignee updates, and ticket resolution logs.
 
+### 🤖 5. AI Occupancy Forecasting Backend Module
+* **JWT Protected Endpoint (`GET /api/forecast`)**: Integrates real-time seat statistics with lightweight predictive AI forecasting logic to estimate tomorrow, weekly, and monthly seat occupancy trends.
+* **Granular RBAC Scope Isolation**:
+  * `admin`: Complete global forecasting access with cross-branch query filtering.
+  * `manager`/`receptionist`: Strict automatic locking to their assigned branch location. Any bypass query is strictly blocked with a standard `403 Forbidden` response.
+
 ---
 
 ## 🛠️ Tech Stack Used

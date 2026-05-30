@@ -51,15 +51,28 @@ const seedSeats = async () => {
     // Seed 40 seats per branch
     BRANCHES.forEach(branch => {
       console.log(`🌱 Generating seat layout for branch: ${branch}...`);
+      
+      // Dynamic target occupancy rate per branch
+      let targetOccupancy = 0.50;
+      if (branch === 'hyderabad') targetOccupancy = 0.65;
+      else if (branch === 'bangalore') targetOccupancy = 0.42;
+      else if (branch === 'chennai') targetOccupancy = 0.78;
+      else if (branch === 'indiranagar') targetOccupancy = 0.55;
+      else if (branch === 'mumbai-bkc') targetOccupancy = 0.83;
+      else if (branch === 'gurugram-cyber-city') targetOccupancy = 0.38;
+
       for (let index = 0; index < 40; index++) {
         // ID pattern A1-E8
         const seatLetter = String.fromCharCode(65 + Math.floor(index / 8));
         const seatNum = (index % 8) + 1;
         const seatNumber = `${seatLetter}${seatNum}`;
 
-        const branchIndex = BRANCHES.indexOf(branch);
-        const offset = (index + (branchIndex * 7)) % PATTERNS.length;
-        const status = PATTERNS[offset];
+        // Allocate statuses based on index and branch target occupancy
+        const seatRatio = index / 40;
+        let status = 'available';
+        if (seatRatio < targetOccupancy) {
+          status = (index % 5 === 0) ? 'reserved' : 'occupied';
+        }
 
         const seatRecord = {
           seatNumber,

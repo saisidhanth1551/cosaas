@@ -8,6 +8,12 @@ const roomRoutes = require('./routes/roomRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const activityRoutes = require('./routes/activityRoutes');
+const forecastRoutes = require('./routes/forecastRoutes');
+const loadRoutes = require('./routes/loadRoutes');
+const renewalRoutes = require('./routes/renewalRoutes');
+const recommendationRoutes = require('./routes/recommendationRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const User = require('./models/User');
 const Seat = require('./models/Seat');
 
@@ -69,11 +75,26 @@ connectDB().then(async () => {
       const seedData = [];
 
       SEED_BRANCHES.forEach(branch => {
+        // Dynamic target occupancy rate per branch
+        let targetOccupancy = 0.50;
+        if (branch === 'hyderabad') targetOccupancy = 0.65;
+        else if (branch === 'bangalore') targetOccupancy = 0.42;
+        else if (branch === 'chennai') targetOccupancy = 0.78;
+        else if (branch === 'indiranagar') targetOccupancy = 0.55;
+        else if (branch === 'mumbai-bkc') targetOccupancy = 0.83;
+        else if (branch === 'gurugram-cyber-city') targetOccupancy = 0.38;
+
         for (let index = 0; index < 40; index++) {
           const seatLetter = String.fromCharCode(65 + Math.floor(index / 8));
           const seatNum = (index % 8) + 1;
           const seatNumber = `${seatLetter}${seatNum}`;
-          const status = PATTERNS[index % PATTERNS.length];
+          
+          // Allocate statuses based on index and branch target occupancy
+          const seatRatio = index / 40;
+          let status = 'available';
+          if (seatRatio < targetOccupancy) {
+            status = (index % 5 === 0) ? 'reserved' : 'occupied';
+          }
 
           seedData.push({
             seatNumber,
@@ -120,6 +141,195 @@ connectDB().then(async () => {
     } else {
       console.log(`✅ Support tickets verified. ${ticketCount} operational records active.`);
     }
+
+    // Auto-seed CRM Clients if missing
+    const Client = require('./models/Client');
+    const clientCount = await Client.countDocuments();
+    if (clientCount === 0) {
+      console.log('🌱 No CRM Client profiles found. Initiating auto-seed process...');
+      const today = new Date();
+      const createDateOffset = (monthsOffset) => {
+        const d = new Date(today);
+        d.setMonth(d.getMonth() + monthsOffset);
+        return d;
+      };
+
+      const seedClients = [
+        {
+          clientName: 'Rohan Gupta',
+          company: 'Zepto Growth',
+          branch: 'indiranagar',
+          contractStartDate: createDateOffset(-6),
+          contractEndDate: createDateOffset(1),
+          email: 'rohan.gupta@zepto.co',
+          phone: '+91 98765 43210',
+          occupancyDuration: 42,
+          bookingFrequency: 35,
+          roomUsage: 30,
+          ticketSatisfaction: 20,
+          recentActivity: 25
+        },
+        {
+          clientName: 'Anisha Sen',
+          company: 'Razorpay Ops',
+          branch: 'indiranagar',
+          contractStartDate: createDateOffset(-11),
+          contractEndDate: createDateOffset(12),
+          email: 'anisha.sen@razorpay.com',
+          phone: '+91 98123 45678',
+          occupancyDuration: 95,
+          bookingFrequency: 92,
+          roomUsage: 88,
+          ticketSatisfaction: 90,
+          recentActivity: 96
+        },
+        {
+          clientName: 'Animesh Roy',
+          company: 'CRED Premium',
+          branch: 'indiranagar',
+          contractStartDate: createDateOffset(-4),
+          contractEndDate: createDateOffset(2),
+          email: 'animesh@cred.club',
+          phone: '+91 99887 76655',
+          occupancyDuration: 60,
+          bookingFrequency: 55,
+          roomUsage: 65,
+          ticketSatisfaction: 75,
+          recentActivity: 52
+        },
+        {
+          clientName: 'Deepak Sen',
+          company: 'Urban Company',
+          branch: 'mumbai-bkc',
+          contractStartDate: createDateOffset(-10),
+          contractEndDate: createDateOffset(2),
+          email: 'deepak.sen@urbancompany.com',
+          phone: '+91 97766 55443',
+          occupancyDuration: 85,
+          bookingFrequency: 80,
+          roomUsage: 75,
+          ticketSatisfaction: 85,
+          recentActivity: 90
+        },
+        {
+          clientName: 'Preeti Sharma',
+          company: 'Swiggy Instamart',
+          branch: 'gurugram-cyber-city',
+          contractStartDate: createDateOffset(-8),
+          contractEndDate: createDateOffset(0),
+          email: 'preeti.s@swiggy.in',
+          phone: '+91 96655 44332',
+          occupancyDuration: 30,
+          bookingFrequency: 25,
+          roomUsage: 20,
+          ticketSatisfaction: 40,
+          recentActivity: 15
+        },
+        {
+          clientName: 'Kunal Kapoor',
+          company: 'Groww Wealth',
+          branch: 'gurugram-cyber-city',
+          contractStartDate: createDateOffset(-5),
+          contractEndDate: createDateOffset(7),
+          email: 'kunal.kapoor@groww.in',
+          phone: '+91 95544 33221',
+          occupancyDuration: 75,
+          bookingFrequency: 70,
+          roomUsage: 60,
+          ticketSatisfaction: 80,
+          recentActivity: 72
+        },
+        {
+          clientName: 'Karthik Rao',
+          company: 'PhonePe Finance',
+          branch: 'hyderabad',
+          contractStartDate: createDateOffset(-12),
+          contractEndDate: createDateOffset(6),
+          email: 'karthik@phonepe.com',
+          phone: '+91 94433 22110',
+          occupancyDuration: 90,
+          bookingFrequency: 95,
+          roomUsage: 85,
+          ticketSatisfaction: 95,
+          recentActivity: 92
+        },
+        {
+          clientName: 'Sneha Reddy',
+          company: 'Zomato Dine',
+          branch: 'hyderabad',
+          contractStartDate: createDateOffset(-3),
+          contractEndDate: createDateOffset(9),
+          email: 'sneha.reddy@zomato.com',
+          phone: '+91 93322 11009',
+          occupancyDuration: 65,
+          bookingFrequency: 50,
+          roomUsage: 55,
+          ticketSatisfaction: 70,
+          recentActivity: 68
+        },
+        {
+          clientName: 'Divya Gowda',
+          company: 'Lenskart Retail',
+          branch: 'bangalore',
+          contractStartDate: createDateOffset(-18),
+          contractEndDate: createDateOffset(6),
+          email: 'divya@lenskart.in',
+          phone: '+91 92211 00998',
+          occupancyDuration: 95,
+          bookingFrequency: 90,
+          roomUsage: 92,
+          ticketSatisfaction: 90,
+          recentActivity: 88
+        },
+        {
+          clientName: 'Aditya Bhat',
+          company: 'Ola Mobility',
+          branch: 'bangalore',
+          contractStartDate: createDateOffset(-6),
+          contractEndDate: createDateOffset(1),
+          email: 'aditya.bhat@olacabs.com',
+          phone: '+91 91100 99887',
+          occupancyDuration: 40,
+          bookingFrequency: 45,
+          roomUsage: 35,
+          ticketSatisfaction: 50,
+          recentActivity: 38
+        },
+        {
+          clientName: 'Hari Krishnan',
+          company: 'Ather Energy',
+          branch: 'chennai',
+          contractStartDate: createDateOffset(-9),
+          contractEndDate: createDateOffset(3),
+          email: 'hari.krishnan@atherenergy.com',
+          phone: '+91 90099 88776',
+          occupancyDuration: 78,
+          bookingFrequency: 82,
+          roomUsage: 80,
+          ticketSatisfaction: 85,
+          recentActivity: 75
+        },
+        {
+          clientName: 'Nisha Nair',
+          company: 'Meesho Logistics',
+          branch: 'mumbai-bkc',
+          contractStartDate: createDateOffset(-2),
+          contractEndDate: createDateOffset(10),
+          email: 'nisha.nair@meesho.com',
+          phone: '+91 95151 51515',
+          occupancyDuration: 70,
+          bookingFrequency: 65,
+          roomUsage: 70,
+          ticketSatisfaction: 75,
+          recentActivity: 60
+        }
+      ];
+
+      await Client.create(seedClients);
+      console.log(`✅ CRM Client auto-seed completed. Seeded ${seedClients.length} accounts.`);
+    } else {
+      console.log(`✅ CRM Client database verified. ${clientCount} active accounts ready.`);
+    }
   } catch (err) {
     console.error(`⚠️ Auto-seeding warning: ${err.message}`);
   }
@@ -142,6 +352,12 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/forecast', forecastRoutes);
+app.use('/api/load-score', loadRoutes);
+app.use('/api/renewal-predictions', renewalRoutes);
+app.use('/api/recommendations', recommendationRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Base route health check
 app.get('/', (req, res) => {
